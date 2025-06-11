@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=640, height=1008, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+    <title>智慧宇宙 - 联通云盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
+        }
+
+        body {
+            font-family: 'SF Pro Display', system-ui, -apple-system, sans-serif;
+            background: #000;
+            color: white;
+            margin: 0;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        /* 固定640x1008设计，居中显示 */
+        .mobile-container {
+            width: 640px;
+            height: 1008px;
+            position: fixed;
+            background: #000;
+            overflow: hidden;
+            transform-origin: center center;
+        }
+        
+        /* JavaScript将处理缩放和定位 */
+
+        .universe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 17, 34, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 34, 17, 0.6) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 17, 0, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 60% 80%, rgba(17, 0, 34, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 10% 10%, rgba(0, 51, 102, 0.2) 0%, transparent 60%),
+                #000011;
+            animation: universe-drift 30s ease-in-out infinite;
+        }
+
+        .universe::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 70% 30%, rgba(0, 255, 255, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 30% 70%, rgba(0, 255, 102, 0.02) 0%, transparent 35%);
+            animation: nebula-flow 25s ease-in-out infinite reverse;
+        }
+
+        .universe::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 85% 15%, rgba(102, 204, 255, 0.02) 0%, transparent 45%),
+                radial-gradient(ellipse at 15% 85%, rgba(255, 102, 153, 0.015) 0%, transparent 50%);
+            animation: cosmic-pulse 35s ease-in-out infinite;
+        }
+
+        .star-field {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: star-twinkle 4s ease-in-out infinite;
+        }
+
+        .star::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+            animation: star-glow 3s ease-in-out infinite alternate;
+        }
+
+        .star:nth-child(3n) {
+            background: #66ccff;
+            animation-duration: 5s;
+        }
+
+        .star:nth-child(4n) {
+            background: #ff6699;
+            animation-duration: 6s;
+        }
+
+        .star:nth-child(5n) {
+            background: #ffcc00;
+            animation-duration: 3.5s;
+        }
+
+        .star:nth-child(7n) {
+            background: #00ff66;
+            animation-duration: 4.5s;
+        }
+
+        .particle-space {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
+        }
+
+        .space-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particle-drift linear infinite;
+        }
+
+        .space-particle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+            animation: particle-glow 2s ease-in-out infinite alternate;
+        }
+
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .scene.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .cosmic-title {
+            font-size: 50px;
+            font-weight: 900;
+            color: #00ffff;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: title-pulse 3s ease-in-out infinite;
+            text-shadow: 0 0 25px rgba(0, 255, 255, 0.7);
+        }
+
+        .glitch-title {
+            font-size: 70px;
+            font-weight: 900;
+            color: #00ffff;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            animation: glitch-pulse 4s ease-in-out infinite;
+        }
+
+        .glitch-title::before,
+        .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .glitch-title::before {
+            animation: glitch-1 2s infinite;
+            color: #ff0040;
+            z-index: -1;
+        }
+
+        .glitch-title::after {
+            animation: glitch-2 3s infinite;
+            color: #00ff80;
+            z-index: -2;
+        }
+
+        .cosmic-subtitle {
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 50px;
+            color: #ffffff;
+            opacity: 0.8;
+            max-width: 400px;
+            line-height: 1.4;
+        }
+
+        .energy-btn {
+            background: #00ffff;
+            color: #000;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .energy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px #00ffff, 0 0 30px #00ffff;
+        }
+
+        .lifeform-space {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .galaxy-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: core-pulse 2s ease-in-out infinite;
+            box-shadow: 
+                0 0 20px #00ffff,
+                0 0 40px #00ff66,
+                0 0 60px #00ffff;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .digital-being {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            animation: being-float 6s ease-in-out infinite;
+        }
+
+        .being-orb {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 900;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 15px #00ffff;
+            color: #ffffff;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .being-orb::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid #00ffff;
+            opacity: 0.3;
+            animation: orb-ring 3s ease-in-out infinite;
+        }
+
+        .digital-being:hover {
+            transform: scale(1.1);
+        }
+
+        .digital-being:hover .being-orb {
+            box-shadow: 0 0 25px #00ffff, 0 0 50px #00ff66;
+        }
+
+        .type-photos { border-color: #ff6699; box-shadow: 0 0 15px #ff6699; }
+        .type-photos::before { border-color: #ff6699; }
+        .type-photos:hover { box-shadow: 0 0 25px #ff6699, 0 0 50px #ff6699 !important; }
+
+        .type-music { border-color: #ffcc00; box-shadow: 0 0 15px #ffcc00; }
+        .type-music::before { border-color: #ffcc00; }
+        .type-music:hover { box-shadow: 0 0 25px #ffcc00, 0 0 50px #ffcc00 !important; }
+
+        .type-documents { border-color: #66ccff; box-shadow: 0 0 15px #66ccff; }
+        .type-documents::before { border-color: #66ccff; }
+        .type-documents:hover { box-shadow: 0 0 25px #66ccff, 0 0 50px #66ccff !important; }
+
+        .type-videos { border-color: #9966ff; box-shadow: 0 0 15px #9966ff; }
+        .type-videos::before { border-color: #9966ff; }
+        .type-videos:hover { box-shadow: 0 0 25px #9966ff, 0 0 50px #9966ff !important; }
+
+        .type-data { border-color: #ff6600; box-shadow: 0 0 15px #ff6600; }
+        .type-data::before { border-color: #ff6600; }
+        .type-data:hover { box-shadow: 0 0 25px #ff6600, 0 0 50px #ff6600 !important; }
+
+        .type-secure { border-color: #00ff66; box-shadow: 0 0 15px #00ff66; }
+        .type-secure::before { border-color: #00ff66; }
+        .type-secure:hover { box-shadow: 0 0 25px #00ff66, 0 0 50px #00ff66 !important; }
+
+        .type-sync { border-color: #ff9900; box-shadow: 0 0 15px #ff9900; }
+        .type-sync::before { border-color: #ff9900; }
+        .type-sync:hover { box-shadow: 0 0 25px #ff9900, 0 0 50px #ff9900 !important; }
+
+        .burst-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: particle-explode 1.5s ease-out forwards;
+        }
+
+        .collect-notice {
+            position: absolute;
+            background: #00ffff;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            z-index: 9999;
+            animation: notice-float 2s ease-out forwards;
+            box-shadow: 0 0 20px #00ffff;
+            white-space: nowrap;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ai-solar-system {
+            position: relative;
+            width: 450px;
+            height: 450px;
+            margin: 20px auto;
+        }
+
+        .ai-sun {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: #00ffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 28px;
+            color: #000;
+            animation: ai-rotate 4s linear infinite;
+            box-shadow: 
+                0 0 40px #00ffff,
+                0 0 80px #00ff66,
+                inset 0 0 30px rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .ai-sun:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 
+                0 0 60px #00ffff,
+                0 0 120px #00ff66,
+                inset 0 0 50px rgba(255,255,255,0.5);
+        }
+
+        .ai-sun.charging {
+            animation: ai-charging 0.5s ease-in-out;
+        }
+
+        .asteroid-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: orbit-spin linear infinite;
+            pointer-events: none;
+        }
+
+        .asteroid {
+            position: absolute;
+            border-radius: 50%;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            animation: asteroid-spin 3s linear infinite;
+            pointer-events: none;
+        }
+
+        .asteroid-1 {
+            width: 18px;
+            height: 18px;
+            background: #ff6699;
+            box-shadow: 0 0 15px #ff6699;
+            animation-duration: 2s;
+        }
+
+        .asteroid-2 {
+            width: 14px;
+            height: 14px;
+            background: #ffcc00;
+            box-shadow: 0 0 12px #ffcc00;
+            animation-duration: 2.5s;
+        }
+
+        .asteroid-3 {
+            width: 16px;
+            height: 16px;
+            background: #66ccff;
+            box-shadow: 0 0 14px #66ccff;
+            animation-duration: 3s;
+        }
+
+        .asteroid-4 {
+            width: 20px;
+            height: 20px;
+            background: #9966ff;
+            box-shadow: 0 0 18px #9966ff;
+            animation-duration: 2.8s;
+        }
+
+        .asteroid-5 {
+            width: 12px;
+            height: 12px;
+            background: #ff6600;
+            box-shadow: 0 0 10px #ff6600;
+            animation-duration: 3.5s;
+        }
+
+        .asteroid-6 {
+            width: 15px;
+            height: 15px;
+            background: #00ff66;
+            box-shadow: 0 0 13px #00ff66;
+            animation-duration: 2.2s;
+        }
+
+        .asteroid-7 {
+            width: 17px;
+            height: 17px;
+            background: #ff9900;
+            box-shadow: 0 0 15px #ff9900;
+            animation-duration: 2.7s;
+        }
+
+        .saturn-system {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 30px auto;
+            cursor: pointer;
+        }
+
+        .saturn-planet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75%;
+            height: 75%;
+            background: #00ffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: planet-spin 8s linear infinite;
+            box-shadow: 
+                0 0 40px #00ffff,
+                inset 0 0 40px rgba(255,255,255,0.2);
+            transition: all 0.4s ease;
+        }
+
+        .saturn-system:hover .saturn-planet {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 
+                0 0 60px #00ffff,
+                0 0 80px #00ff66,
+                inset 0 0 50px rgba(255,255,255,0.3);
+        }
+
+        .saturn-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 3px solid #00ff66;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: ring-rotate 12s linear infinite;
+        }
+
+        .saturn-ring:nth-child(1) {
+            animation-duration: 15s;
+            opacity: 0.4;
+            border-color: #ffcc00;
+        }
+
+        .saturn-ring:nth-child(2) {
+            animation-duration: 18s;
+            opacity: 0.3;
+            border-color: #ff6699;
+        }
+
+        .storage-text {
+            font-size: 40px;
+            font-weight: 900;
+            color: #000;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .storage-label {
+            font-size: 16px;
+            color: #000;
+            margin-top: 8px;
+            opacity: 0.8;
+            display: none;
+        }
+
+        .scene4-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        .planet-guide-text {
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            animation: title-pulse 3s ease-in-out infinite;
+            margin-bottom: 20px;
+            white-space: nowrap;
+        }
+
+        .planet-guide-arrow {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #00ffff;
+            animation: arrow-bounce 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px #00ffff);
+            margin-bottom: 30px;
+        }
+
+        .scene-guide {
+            position: absolute;
+            bottom: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            cursor: pointer;
+            color: #ffffff;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .scene-guide:hover {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .guide-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .guide-arrow {
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 18px solid #00ffff;
+            margin: 0 auto;
+            animation: arrow-bounce 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px #00ffff);
+        }
+
+        .galaxy-welcome {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 50px;
+        }
+
+        .welcome-portal {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 20px 0;
+        }
+
+        .portal-energy-field {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at center, 
+                    rgba(0, 255, 255, 0.3) 0%, 
+                    rgba(0, 255, 102, 0.2) 30%, 
+                    rgba(0, 17, 34, 0.1) 70%, 
+                    transparent 100%);
+            border-radius: 50%;
+            animation: energy-pulse 3s ease-in-out infinite;
+        }
+
+        .portal-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .portal-ring-system {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .portal-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .portal-ring-1 {
+            width: 400px;
+            height: 400px;
+            border-color: #00ffff;
+            animation: portal-ring-rotate-1 15s linear infinite;
+            box-shadow: 
+                0 0 20px #00ffff,
+                inset 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .portal-ring-2 {
+            width: 480px;
+            height: 480px;
+            border-color: #00ff66;
+            animation: portal-ring-rotate-2 20s linear infinite reverse;
+            box-shadow: 
+                0 0 25px #00ff66,
+                inset 0 0 25px rgba(0, 255, 102, 0.3);
+        }
+
+        .portal-ring::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: inherit;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .portal-ring::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: inherit;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        .modern-button {
+            background: #00ffff;
+            border: none;
+            border-radius: 30px;
+            padding: 32px 80px;
+            font-size: 30px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 
+                0 0 50px rgba(0, 255, 255, 0.7),
+                0 15px 50px rgba(0, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            min-width: 280px;
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.4s ease;
+        }
+
+        .modern-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .portal-core:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .portal-core:hover .modern-button {
+            background: #00ff66;
+            box-shadow: 
+                0 0 80px rgba(0, 255, 255, 0.9),
+                0 20px 60px rgba(0, 255, 255, 0.7);
+            transform: translateY(-8px);
+            color: #000;
+        }
+
+        .portal-core:hover .modern-button::before {
+            left: 100%;
+        }
+
+        .portal-core:hover .portal-ring-1 {
+            animation-duration: 8s;
+            border-color: #ffffff;
+            box-shadow: 
+                0 0 40px #ffffff,
+                inset 0 0 40px rgba(255, 255, 255, 0.5);
+        }
+
+        .portal-core:hover .portal-ring-2 {
+            animation-duration: 10s;
+            border-color: #ffcc00;
+            box-shadow: 
+                0 0 45px #ffcc00,
+                inset 0 0 45px rgba(255, 204, 0, 0.5);
+        }
+
+        .portal-particles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 260px;
+            height: 260px;
+        }
+
+        .portal-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ffff;
+        }
+
+        .teleport-beam {
+            position: fixed;
+            width: 4px;
+            height: 100vh;
+            background: #00ffff;
+            top: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            animation: beam-strike 0.8s ease-in-out forwards;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .nav-portal {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: #00ffff;
+            transform: scale(1.5);
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .brand-mark {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 100;
+            max-width: 200px;
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+
+        .audio-indicator {
+            transition: opacity 2s ease-out;
+        }
+
+        .music-control {
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .music-control:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .brand-footer {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 100;
+        }
+
+        .feature-highlights {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px 20px;
+            margin: 40px auto 30px auto;
+            max-width: 320px;
+            justify-items: center;
+        }
+
+        .feature-item {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            min-width: 130px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #00ffff;
+            margin-bottom: 6px;
+        }
+
+        .feature-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        @keyframes universe-drift {
+            0%, 100% { 
+                background-position: 0% 0%, 100% 100%, 50% 50%, 60% 80%, 10% 10%;
+            }
+            25% { 
+                background-position: 10% 10%, 90% 90%, 40% 60%, 70% 70%, 20% 0%;
+            }
+            50% { 
+                background-position: 20% 20%, 80% 80%, 60% 40%, 50% 90%, 0% 20%;
+            }
+            75% { 
+                background-position: 30% 10%, 70% 90%, 30% 70%, 80% 50%, 30% 30%;
+            }
+        }
+
+        @keyframes nebula-flow {
+            0%, 100% { 
+                background-position: 0% 0%, 100% 100%;
+                opacity: 1;
+            }
+            50% { 
+                background-position: 100% 50%, 0% 50%;
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes cosmic-pulse {
+            0%, 100% { 
+                background-position: 0% 0%, 100% 100%;
+                transform: scale(1);
+            }
+            50% { 
+                background-position: 50% 50%, 50% 50%;
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes particle-drift {
+            0% {
+                transform: translateZ(0) translateX(0) translateY(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateZ(-1000px) translateX(var(--dx)) translateY(var(--dy));
+                opacity: 0;
+            }
+        }
+
+        @keyframes particle-glow {
+            0% { 
+                box-shadow: 0 0 5px currentColor;
+            }
+            100% { 
+                box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+            }
+        }
+
+        @keyframes glitch-pulse {
+            0%, 90%, 100% {
+                text-shadow: 0 0 25px rgba(0, 255, 255, 0.7);
+            }
+            5%, 15%, 25%, 35%, 45%, 55%, 65%, 75%, 85% {
+                text-shadow: 
+                    2px 0 rgba(255, 0, 64, 0.8),
+                    -2px 0 rgba(0, 255, 128, 0.8),
+                    0 0 25px rgba(0, 255, 255, 0.7);
+            }
+        }
+
+        @keyframes glitch-1 {
+            0%, 90%, 100% {
+                transform: translateX(0);
+            }
+            10% {
+                transform: translateX(-2px);
+            }
+            20% {
+                transform: translateX(2px);
+            }
+            30% {
+                transform: translateX(-1px);
+            }
+            40% {
+                transform: translateX(1px);
+            }
+            50% {
+                transform: translateX(-1px);
+            }
+            60% {
+                transform: translateX(0);
+            }
+            70% {
+                transform: translateX(1px);
+            }
+            80% {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glitch-2 {
+            0%, 90%, 100% {
+                transform: translateX(0);
+            }
+            5% {
+                transform: translateX(2px);
+            }
+            15% {
+                transform: translateX(-2px);
+            }
+            25% {
+                transform: translateX(1px);
+            }
+            35% {
+                transform: translateX(-1px);
+            }
+            45% {
+                transform: translateX(1px);
+            }
+            55% {
+                transform: translateX(-1px);
+            }
+            65% {
+                transform: translateX(0);
+            }
+            75% {
+                transform: translateX(-1px);
+            }
+            85% {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes star-twinkle {
+            0%, 100% { 
+                opacity: 0.4; 
+                transform: scale(0.8) rotate(0deg);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2) rotate(180deg);
+            }
+        }
+
+        @keyframes star-glow {
+            0% { 
+                box-shadow: 0 0 8px currentColor;
+            }
+            100% { 
+                box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+            }
+        }
+
+        @keyframes title-pulse {
+            0%, 100% { 
+                text-shadow: 0 0 25px rgba(0, 255, 255, 0.7); 
+            }
+            50% { 
+                text-shadow: 0 0 40px rgba(0, 255, 255, 0.8), 0 0 55px rgba(0, 255, 102, 0.6); 
+            }
+        }
+
+        @keyframes core-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes being-float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(3deg); }
+            66% { transform: translateY(10px) rotate(-3deg); }
+        }
+
+        @keyframes orb-ring {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        @keyframes particle-explode {
+            0% {
+                opacity: 1;
+                transform: scale(1) translate(0, 0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5) translate(var(--dx), var(--dy));
+            }
+        }
+
+        @keyframes notice-float {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translateY(-10px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.8);
+            }
+        }
+
+        @keyframes ai-rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes orbit-spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes asteroid-spin {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        @keyframes planet-spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes ring-rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes energy-pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 0.6; 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1); 
+                opacity: 0.8; 
+            }
+        }
+
+        @keyframes portal-ring-rotate-1 {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes portal-ring-rotate-2 {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes beam-strike {
+            0% { 
+                opacity: 0; 
+                transform: scaleY(0); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: scaleY(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: scaleY(1); 
+            }
+        }
+
+        @keyframes ai-charging {
+            0% { 
+                transform: translate(-50%, -50%) scale(1); 
+                box-shadow: 0 0 40px #00ffff, 0 0 80px #00ff66;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.3); 
+                box-shadow: 0 0 100px #00ffff, 0 0 200px #00ff66, 0 0 300px #ffffff;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                box-shadow: 0 0 60px #00ffff, 0 0 120px #00ff66;
+            }
+        }
+
+        @keyframes arrow-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="universe">
+            <div class="star-field" id="starField"></div>
+            <div class="particle-space" id="particleSpace"></div>
+        </div>
+    
+            <div class="brand-mark">联通沃派·探享多彩人生的5G时代潮牌</div>
+        
+        <!-- 音效状态指示器 -->
+        <div class="audio-indicator" id="audioIndicator" style="position: fixed; top: 15px; right: 15px; color: rgba(255,255,255,0.6); font-size: 12px; z-index: 100;">
+            🔇 点击任意处启用音效
+        </div>
+        
+        <!-- 背景音乐控制 -->
+        <div class="music-control" id="musicToggle" onclick="toggleBackgroundMusic()" 
+             style="position: fixed; top: 15px; right: 60px; color: rgba(255,255,255,0.6); font-size: 20px; z-index: 100; cursor: pointer; user-select: none; transition: all 0.3s ease;"
+             title="点击控制背景音乐">
+            🎵
+        </div>
+    
+    <div class="scene active" id="scene1">
+        <div class="glitch-title" data-text="未知信号" style="font-size: 90px; line-height: 0.9; margin-bottom: 40px;">
+            未知<br>信号
+        </div>
+        <div class="cosmic-subtitle" style="position: static; top: auto; transform: none; left: auto;">
+            <strong>检测到来自智慧宇宙的神秘信号<br>
+            是否开始探索？</strong>
+        </div>
+        <button class="energy-btn" onclick="nextScene()">开始探索</button>
+    </div>
+
+    <div class="scene" id="scene2">
+        <div class="cosmic-title" style="font-size: 32px; margin-bottom: 20px;">
+            数字生命体
+        </div>
+        <div class="cosmic-subtitle" style="margin-bottom: 30px;">
+            <strong>宇宙中发现了神秘的数字生命体<br>
+            点击收集它们</strong>
+        </div>
+        
+        <div class="lifeform-space">
+            <div class="galaxy-core"></div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="影像生命体" 
+                 style="top: 15%; left: 20%; animation-delay: 0s;">
+                <div class="being-orb type-photos">JPG</div>
+            </div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="音频生命体"
+                 style="top: 10%; right: 25%; animation-delay: 1s;">
+                <div class="being-orb type-music">MP3</div>
+            </div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="文档生命体"
+                 style="bottom: 30%; left: 15%; animation-delay: 2s;">
+                <div class="being-orb type-documents">PDF</div>
+            </div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="视频生命体"
+                 style="bottom: 15%; right: 20%; animation-delay: 3s;">
+                <div class="being-orb type-videos">MP4</div>
+            </div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="数据生命体"
+                 style="top: 55%; left: 55%; animation-delay: 4s;">
+                <div class="being-orb type-data">XLS</div>
+            </div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="加密生命体"
+                 style="top: 40%; left: 5%; animation-delay: 5s;">
+                <div class="being-orb type-secure">ZIP</div>
+            </div>
+            
+            <div class="digital-being" onclick="collectBeing(this)" data-type="同步生命体"
+                 style="bottom: 40%; right: 8%; animation-delay: 6s;">
+                <div class="being-orb type-sync">BAK</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scene" id="scene3">
+        <div class="cosmic-title" style="font-size: 30px; margin-bottom: 20px;">
+            AI宇宙诞生
+        </div>
+        <div class="cosmic-subtitle" style="margin-bottom: 40px;">
+            <strong>数字生命体汇聚形成智慧宇宙</strong>
+        </div>
+        
+        <div class="ai-solar-system">
+            <div class="ai-sun" onclick="chargeAI(this)">AI</div>
+            
+            <div class="asteroid-orbit" style="width: 180px; height: 180px; animation-duration: 8s;">
+                <div class="asteroid asteroid-1"></div>
+            </div>
+            <div class="asteroid-orbit" style="width: 230px; height: 230px; animation-duration: 12s;">
+                <div class="asteroid asteroid-2"></div>
+            </div>
+            <div class="asteroid-orbit" style="width: 280px; height: 280px; animation-duration: 16s;">
+                <div class="asteroid asteroid-3"></div>
+            </div>
+            <div class="asteroid-orbit" style="width: 330px; height: 330px; animation-duration: 20s;">
+                <div class="asteroid asteroid-4"></div>
+            </div>
+            <div class="asteroid-orbit" style="width: 380px; height: 380px; animation-duration: 24s;">
+                <div class="asteroid asteroid-5"></div>
+            </div>
+            <div class="asteroid-orbit" style="width: 210px; height: 210px; animation-duration: 10s; animation-direction: reverse;">
+                <div class="asteroid asteroid-6"></div>
+            </div>
+            <div class="asteroid-orbit" style="width: 360px; height: 360px; animation-duration: 18s; animation-direction: reverse;">
+                <div class="asteroid asteroid-7"></div>
+            </div>
+        </div>
+        
+        <div class="scene-guide" onclick="showChargeHint()">
+            <div class="guide-arrow"></div>
+            <div class="guide-text">点击充能</div>
+        </div>
+    </div>
+
+    <div class="scene" id="scene4">
+        <div class="scene4-container">
+            <div class="planet-guide-text">点击探索智慧宇宙</div>
+            <div class="planet-guide-arrow"></div>
+            
+            <div class="saturn-system" onclick="nextScene()">
+                <div class="saturn-ring" style="width: 100%; height: 100%;"></div>
+                <div class="saturn-ring" style="width: 85%; height: 85%;"></div>
+                <div class="saturn-ring" style="width: 70%; height: 70%;"></div>
+                
+                <div class="saturn-planet">
+                    <div class="storage-text">8T智慧宇宙</div>
+                    <div class="storage-label">无限星域</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scene" id="scene5">
+        <div class="galaxy-welcome">
+            <div class="welcome-portal">
+                <div class="portal-energy-field"></div>
+                <div class="portal-particles" id="portalParticles"></div>
+                
+                <div class="portal-core" onclick="joinGalaxy()">
+                    <div class="portal-ring-system">
+                        <div class="portal-ring portal-ring-1"></div>
+                        <div class="portal-ring portal-ring-2"></div>
+                    </div>
+                    
+                    <div class="modern-button">
+                        联通云盘
+                    </div>
+                    
+                    <div class="cosmic-subtitle" style="position: absolute; top: 120%; left: 50%; transform: translateX(-50%); margin: 0; color: #ffffff; font-weight: 700; font-size: 14px; z-index: 5; text-align: center; width: 280px; white-space: nowrap;">
+                        立即加入<span style="color: #00ffff;">智慧宇宙</span><br>
+                        <span style="font-size: 16px;">开启你的<span style="color: #ffcc00; font-weight: 900;">8T</span>专属宇宙空间</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-highlights">
+                <div class="feature-item">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">8T空间</div>
+                    <div class="feature-desc">超大存储容量</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">极速传输</div>
+                    <div class="feature-desc">秒传大文件</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">安全加密</div>
+                    <div class="feature-desc">数据安全保障</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"></div>
+                    <div class="feature-title">多端同步</div>
+                    <div class="feature-desc">随时随地访问</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="brand-footer">智慧宇宙 · 联通云盘</div>
+
+    <div class="nav-portal">
+        <div class="nav-dot active" onclick="goToScene(1)"></div>
+        <div class="nav-dot" onclick="goToScene(2)"></div>
+        <div class="nav-dot" onclick="goToScene(3)"></div>
+        <div class="nav-dot" onclick="goToScene(4)"></div>
+        <div class="nav-dot" onclick="goToScene(5)"></div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+        const totalScenes = 5;
+        let collectedBeings = 0;
+        const totalBeings = 7;
+        let aiChargeLevel = 0;
+        const maxChargeLevel = 8;
+        let audioContext;
+        let isAudioEnabled = false;
+        let backgroundMusic = null;
+        let isMusicPlaying = false;
+
+        // 初始化音频上下文（需要用户交互后才能启用）
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            if (!isAudioEnabled) {
+                isAudioEnabled = true;
+                // 更新音效指示器
+                const indicator = document.getElementById('audioIndicator');
+                if (indicator) {
+                    indicator.textContent = '🔊 音效已启用';
+                    indicator.style.color = 'rgba(0,255,255,0.8)';
+                    setTimeout(() => {
+                        indicator.style.opacity = '0';
+                        setTimeout(() => {
+                            if (indicator.parentNode) {
+                                indicator.parentNode.removeChild(indicator);
+                            }
+                        }, 2000);
+                    }, 2000);
+                }
+                // 自动开始播放背景音乐
+                startBackgroundMusic();
+            }
+        }
+
+        // 创建科幻背景音乐
+        function createBackgroundMusic() {
+            if (!audioContext || backgroundMusic) return;
+
+            // 主音量控制
+            const masterGain = audioContext.createGain();
+            masterGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+            masterGain.connect(audioContext.destination);
+
+            // 低频环境音
+            const ambientOsc = audioContext.createOscillator();
+            const ambientGain = audioContext.createGain();
+            ambientOsc.type = 'sine';
+            ambientOsc.frequency.setValueAtTime(40, audioContext.currentTime);
+            ambientGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            ambientOsc.connect(ambientGain);
+            ambientGain.connect(masterGain);
+
+            // 和弦进行 - C minor的科幻变奏
+            const chordFreqs = [
+                [130.81, 155.56, 196.00], // C minor
+                [146.83, 174.61, 220.00], // D minor  
+                [164.81, 196.00, 246.94], // E♭ major
+                [174.61, 207.65, 261.63], // F major
+            ];
+
+            const chordOscillators = [];
+            const chordGains = [];
+
+            // 创建和弦振荡器
+            chordFreqs.forEach((chord, chordIndex) => {
+                chord.forEach((freq, noteIndex) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, audioContext.currentTime);
+                    filter.Q.setValueAtTime(1, audioContext.currentTime);
+                    
+                    gain.gain.setValueAtTime(0, audioContext.currentTime);
+                    
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    chordOscillators.push(osc);
+                    chordGains.push(gain);
+                });
+            });
+
+            // 高频闪烁音效
+            const sparkleOsc = audioContext.createOscillator();
+            const sparkleGain = audioContext.createGain();
+            sparkleOsc.type = 'sine';
+            sparkleOsc.frequency.setValueAtTime(1760, audioContext.currentTime);
+            sparkleGain.gain.setValueAtTime(0, audioContext.currentTime);
+            sparkleOsc.connect(sparkleGain);
+            sparkleGain.connect(masterGain);
+
+            // 启动所有振荡器
+            ambientOsc.start();
+            chordOscillators.forEach(osc => osc.start());
+            sparkleOsc.start();
+
+            // 和弦序列播放
+            function playChordSequence() {
+                const chordDuration = 8; // 每个和弦持续8秒
+                const now = audioContext.currentTime;
+
+                chordFreqs.forEach((chord, chordIndex) => {
+                    const startTime = now + chordIndex * chordDuration;
+                    const endTime = startTime + chordDuration * 0.8;
+
+                    chord.forEach((freq, noteIndex) => {
+                        const oscIndex = chordIndex * 3 + noteIndex;
+                        const gain = chordGains[oscIndex];
+                        
+                        gain.gain.setValueAtTime(0, startTime);
+                        gain.gain.linearRampToValueAtTime(0.08, startTime + 2);
+                        gain.gain.setValueAtTime(0.08, endTime);
+                        gain.gain.linearRampToValueAtTime(0, endTime + 1);
+                    });
+                });
+
+                // 星光闪烁效果
+                for (let i = 0; i < 32; i++) {
+                    const sparkleTime = now + Math.random() * chordDuration * 4;
+                    sparkleGain.gain.setValueAtTime(0, sparkleTime);
+                    sparkleGain.gain.linearRampToValueAtTime(0.02, sparkleTime + 0.1);
+                    sparkleGain.gain.exponentialRampToValueAtTime(0.001, sparkleTime + 1);
+                }
+
+                // 循环播放
+                setTimeout(() => {
+                    if (isMusicPlaying) {
+                        playChordSequence();
+                    }
+                }, chordDuration * 4 * 1000);
+            }
+
+            // 环境音变化
+            function modulateAmbient() {
+                const now = audioContext.currentTime;
+                ambientOsc.frequency.setValueAtTime(40, now);
+                ambientOsc.frequency.linearRampToValueAtTime(60, now + 16);
+                ambientOsc.frequency.linearRampToValueAtTime(40, now + 32);
+                
+                setTimeout(() => {
+                    if (isMusicPlaying) {
+                        modulateAmbient();
+                    }
+                }, 32000);
+            }
+
+            playChordSequence();
+            modulateAmbient();
+
+            backgroundMusic = {
+                masterGain,
+                ambientOsc,
+                chordOscillators,
+                sparkleOsc,
+                stop: () => {
+                    masterGain.disconnect();
+                    ambientOsc.stop();
+                    chordOscillators.forEach(osc => osc.stop());
+                    sparkleOsc.stop();
+                }
+            };
+        }
+
+        function startBackgroundMusic() {
+            if (!audioContext || isMusicPlaying) return;
+            
+            isMusicPlaying = true;
+            createBackgroundMusic();
+            
+            // 更新音乐控制按钮
+            const musicBtn = document.getElementById('musicToggle');
+            if (musicBtn) {
+                musicBtn.textContent = '🎵';
+                musicBtn.style.color = 'rgba(0,255,255,0.8)';
+            }
+        }
+
+        function stopBackgroundMusic() {
+            if (!backgroundMusic || !isMusicPlaying) return;
+            
+            isMusicPlaying = false;
+            backgroundMusic.stop();
+            backgroundMusic = null;
+            
+            // 更新音乐控制按钮
+            const musicBtn = document.getElementById('musicToggle');
+            if (musicBtn) {
+                musicBtn.textContent = '🔇';
+                musicBtn.style.color = 'rgba(255,255,255,0.6)';
+            }
+        }
+
+        function toggleBackgroundMusic() {
+            if (!isAudioEnabled) {
+                initAudio();
+                return;
+            }
+            
+            if (isMusicPlaying) {
+                stopBackgroundMusic();
+            } else {
+                startBackgroundMusic();
+            }
+        }
+
+        // 生成科幻音效
+        function playSound(type) {
+            if (!isAudioEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            const now = audioContext.currentTime;
+            
+            switch(type) {
+                case 'click': // 按钮点击
+                    oscillator.frequency.setValueAtTime(800, now);
+                    oscillator.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                    gainNode.gain.setValueAtTime(0.3, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.1);
+                    break;
+                    
+                case 'collect': // 收集生命体
+                    oscillator.frequency.setValueAtTime(440, now);
+                    oscillator.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+                    gainNode.gain.setValueAtTime(0.2, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.3);
+                    break;
+                    
+                case 'charge': // AI充能
+                    oscillator.frequency.setValueAtTime(200, now);
+                    oscillator.frequency.exponentialRampToValueAtTime(600, now + 0.4);
+                    gainNode.gain.setValueAtTime(0.25, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.4);
+                    break;
+                    
+                case 'teleport': // 传送
+                    // 复杂的传送音效
+                    for(let i = 0; i < 3; i++) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.frequency.setValueAtTime(300 + i * 200, now + i * 0.1);
+                        osc.frequency.exponentialRampToValueAtTime(100 + i * 50, now + 0.8);
+                        gain.gain.setValueAtTime(0.15, now + i * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                        osc.start(now + i * 0.1);
+                        osc.stop(now + 0.8);
+                    }
+                    return; // 跳过下面的代码
+                    
+                case 'transition': // 场景切换
+                    oscillator.frequency.setValueAtTime(500, now);
+                    oscillator.frequency.exponentialRampToValueAtTime(1000, now + 0.15);
+                    oscillator.frequency.exponentialRampToValueAtTime(300, now + 0.3);
+                    gainNode.gain.setValueAtTime(0.2, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.3);
+                    break;
+                    
+                case 'hover': // 悬停音效
+                    oscillator.frequency.setValueAtTime(600, now);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gainNode.gain.setValueAtTime(0.1, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.05);
+                    break;
+            }
+        }
+
+        function initStarField() {
+            const starField = document.getElementById('starField');
+            for (let i = 0; i < 120; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 4 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 8 + 's';
+                star.style.animationDuration = (Math.random() * 4 + 3) + 's';
+                starField.appendChild(star);
+            }
+        }
+
+        function initSpaceParticles() {
+            const particleSpace = document.getElementById('particleSpace');
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'space-particle';
+                
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 1000;
+                
+                particle.style.setProperty('--dx', x + 'px');
+                particle.style.setProperty('--dy', y + 'px');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 8 + 6) + 's';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                
+                if (Math.random() > 0.7) {
+                    const colors = ['#66ccff', '#ff6699', '#ffcc00', '#00ff66'];
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                particleSpace.appendChild(particle);
+            }
+        }
+
+        function initPortalParticles() {
+            const portalParticles = document.getElementById('portalParticles');
+            if (!portalParticles) return;
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'portal-particle';
+                
+                const angle = (i / 12) * Math.PI * 2;
+                const radius = 130;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                particle.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                particle.style.animationDelay = (i * 0.1) + 's';
+                
+                portalParticles.appendChild(particle);
+            }
+        }
+
+        function goToScene(sceneNumber) {
+            if (sceneNumber === currentScene) return;
+            
+            // 初始化音频并播放切换音效
+            initAudio();
+            playSound('transition');
+            
+            // 根据场景调整背景音乐
+            adjustMusicForScene(sceneNumber);
+            
+            const currentSceneElement = document.getElementById(`scene${currentScene}`);
+            const nextSceneElement = document.getElementById(`scene${sceneNumber}`);
+            
+            currentSceneElement.classList.remove('active');
+            nextSceneElement.classList.add('active');
+            
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === sceneNumber);
+            });
+            
+            currentScene = sceneNumber;
+
+            if (sceneNumber === 5) {
+                setTimeout(() => {
+                    initPortalParticles();
+                }, 500);
+            }
+        }
+
+        // 根据场景调整音乐氛围
+        function adjustMusicForScene(sceneNumber) {
+            if (!backgroundMusic || !isMusicPlaying) return;
+            
+            const now = audioContext.currentTime;
+            const masterGain = backgroundMusic.masterGain;
+            
+            switch(sceneNumber) {
+                case 1: // 未知信号 - 神秘感
+                    masterGain.gain.linearRampToValueAtTime(0.08, now + 1);
+                    break;
+                case 2: // 数字生命体 - 活跃感
+                    masterGain.gain.linearRampToValueAtTime(0.12, now + 1);
+                    break;
+                case 3: // AI星系 - 科技感
+                    masterGain.gain.linearRampToValueAtTime(0.15, now + 1);
+                    break;
+                case 4: // 数字行星 - 宏伟感
+                    masterGain.gain.linearRampToValueAtTime(0.18, now + 1);
+                    break;
+                case 5: // 联通云盘 - 激昂感
+                    masterGain.gain.linearRampToValueAtTime(0.2, now + 1);
+                    break;
+            }
+        }
+
+        function nextScene() {
+            playSound('click');
+            const next = currentScene >= totalScenes ? 1 : currentScene + 1;
+            goToScene(next);
+        }
+
+        function collectBeing(element) {
+            if (element.classList.contains('collected')) return;
+            
+            // 播放收集音效
+            initAudio();
+            playSound('collect');
+            
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            createParticleBurst(centerX, centerY, element.querySelector('.being-orb').classList[1]);
+            
+            const notice = document.createElement('div');
+            notice.className = 'collect-notice';
+            notice.textContent = `${element.getAttribute('data-type')} 已同化`;
+            notice.style.left = centerX - 70 + 'px';
+            notice.style.top = centerY - 60 + 'px';
+            document.body.appendChild(notice);
+            
+            setTimeout(() => {
+                if (document.body.contains(notice)) {
+                    document.body.removeChild(notice);
+                }
+            }, 2000);
+            
+            element.style.opacity = '0';
+            element.style.transform = 'scale(0)';
+            element.classList.add('collected');
+            
+            collectedBeings++;
+            
+            if (collectedBeings >= totalBeings) {
+                setTimeout(() => {
+                    goToScene(3);
+                }, 1000);
+            }
+        }
+
+        function createParticleBurst(x, y, colorType) {
+            const colors = {
+                'type-photos': '#ff6699',
+                'type-music': '#ffcc00',
+                'type-documents': '#66ccff',
+                'type-videos': '#9966ff',
+                'type-data': '#ff6600',
+                'type-secure': '#00ff66',
+                'type-sync': '#ff9900',
+                'type-ai-charge': '#00ffff'
+            };
+            
+            const color = colors[colorType] || '#00ffff';
+            
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'burst-particle';
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 6px ${color}`;
+                
+                const angle = (i / 15) * Math.PI * 2;
+                const distance = 50 + Math.random() * 40;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.setProperty('--dx', dx + 'px');
+                particle.style.setProperty('--dy', dy + 'px');
+                particle.style.animationDelay = Math.random() * 0.2 + 's';
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (document.body.contains(particle)) {
+                        document.body.removeChild(particle);
+                    }
+                }, 1500);
+            }
+        }
+
+        function showChargeHint() {
+            playSound('hover');
+            
+            const aiSun = document.querySelector('.ai-sun');
+            const rect = aiSun.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const notice = document.createElement('div');
+            notice.className = 'collect-notice';
+            notice.textContent = `点击上方AI中心进行充能 (${aiChargeLevel}/${maxChargeLevel})`;
+            notice.style.left = centerX - 120 + 'px';
+            notice.style.top = centerY + 80 + 'px';
+            notice.style.background = '#ffcc00';
+            document.body.appendChild(notice);
+
+            setTimeout(() => {
+                if (document.body.contains(notice)) {
+                    document.body.removeChild(notice);
+                }
+            }, 3000);
+        }
+
+        function chargeAI(element) {
+            if (currentScene !== 3) return;
+            
+            // 播放充能音效
+            initAudio();
+            playSound('charge');
+            
+            aiChargeLevel++;
+            
+            element.classList.add('charging');
+            setTimeout(() => {
+                element.classList.remove('charging');
+            }, 500);
+            
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            createParticleBurst(centerX, centerY, 'type-ai-charge');
+            
+            const notice = document.createElement('div');
+            notice.className = 'collect-notice';
+            notice.textContent = `AI充能 ${aiChargeLevel}/${maxChargeLevel}`;
+            notice.style.left = centerX - 60 + 'px';
+            notice.style.top = centerY - 80 + 'px';
+
+            if (aiChargeLevel >= maxChargeLevel) {
+                notice.style.background = '#00ff66';
+                notice.textContent = '充能完成！';
+            } else if (aiChargeLevel >= maxChargeLevel * 0.7) {
+                notice.style.background = '#ffcc00';
+            }
+
+            document.body.appendChild(notice);
+            
+            setTimeout(() => {
+                if (document.body.contains(notice)) {
+                    document.body.removeChild(notice);
+                }
+            }, 2000);
+            
+            if (aiChargeLevel >= maxChargeLevel) {
+                setTimeout(() => {
+                    const finalNotice = document.createElement('div');
+                    finalNotice.className = 'collect-notice';
+                    finalNotice.textContent = 'AI星系已完全激活！';
+                    finalNotice.style.left = centerX - 80 + 'px';
+                    finalNotice.style.top = centerY - 120 + 'px';
+                    finalNotice.style.background = '#00ff66';
+                    document.body.appendChild(finalNotice);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(finalNotice)) {
+                            document.body.removeChild(finalNotice);
+                        }
+                        goToScene(4);
+                    }, 2000);
+                }, 1000);
+            }
+        }
+
+        function joinGalaxy() {
+            // 播放传送音效
+            initAudio();
+            playSound('teleport');
+            
+            // 传送时音乐高潮
+            if (backgroundMusic && isMusicPlaying) {
+                const now = audioContext.currentTime;
+                backgroundMusic.masterGain.gain.linearRampToValueAtTime(0.3, now + 0.5);
+                setTimeout(() => {
+                    if (backgroundMusic && isMusicPlaying) {
+                        backgroundMusic.masterGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 2);
+                    }
+                }, 1000);
+            }
+            
+            const beamCount = 12;
+            const beams = [];
+            
+            for (let i = 0; i < beamCount; i++) {
+                const beam = document.createElement('div');
+                beam.className = 'teleport-beam';
+                beam.style.left = Math.random() * 100 + '%';
+                beam.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(beam);
+                beams.push(beam);
+            }
+            
+            setTimeout(() => {
+                beams.forEach(beam => {
+                    if (document.body.contains(beam)) {
+                        document.body.removeChild(beam);
+                    }
+                });
+                
+                alert('传送成功！\n\n欢迎成为智慧宇宙居民\n你的8T专属宇宙空间已准备就绪\n\n立即进入联通云盘，开启星际之旅！');
+            }, 1200);
+        }
+
+        document.addEventListener('keydown', e => {
+            initAudio(); // 键盘交互时初始化音频
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextScene();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goToScene(currentScene <= 1 ? totalScenes : currentScene - 1);
+            } else if (['1','2','3','4','5'].includes(e.key)) {
+                e.preventDefault();
+                goToScene(parseInt(e.key));
+            }
+        });
+
+        let startX = 0;
+        document.addEventListener('touchstart', e => {
+            initAudio(); // 触摸交互时初始化音频
+            startX = e.touches[0].clientX;
+        });
+        document.addEventListener('touchend', e => {
+            const diffX = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextScene();
+                } else {
+                    goToScene(currentScene <= 1 ? totalScenes : currentScene - 1);
+                }
+            }
+        });
+
+        // 为按钮和交互元素添加悬停音效
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为所有可点击元素添加悬停音效
+            const interactiveElements = document.querySelectorAll('.energy-btn, .digital-being, .ai-sun, .saturn-system, .portal-core, .nav-dot, .scene-guide');
+            
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    if (isAudioEnabled) {
+                        playSound('hover');
+                    }
+                });
+            });
+        });
+
+        // 动态调整容器尺寸和位置
+        function adjustContainer() {
+            const container = document.querySelector('.mobile-container');
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            
+            // 计算缩放比例，确保完全填满屏幕
+            const scaleX = vw / 640;
+            const scaleY = vh / 1008;
+            const scale = Math.min(scaleX, scaleY);
+            
+            // 计算居中位置
+            const scaledWidth = 640 * scale;
+            const scaledHeight = 1008 * scale;
+            const left = (vw - scaledWidth) / 2;
+            const top = (vh - scaledHeight) / 2;
+            
+            container.style.transform = `scale(${scale})`;
+            container.style.left = `${left}px`;
+            container.style.top = `${top}px`;
+        }
+
+        // 页面加载和窗口变化时调整
+        adjustContainer();
+        window.addEventListener('resize', adjustContainer);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(adjustContainer, 100);
+        });
+
+        initStarField();
+        initSpaceParticles();
+
+        // 彻底禁用所有拖拽和缩放
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
+
+        // 禁用双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // 禁用右键菜单
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // 禁用拖拽
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+        });
+
+        // 锁定视口
+        window.addEventListener('resize', function() {
+            setTimeout(function() {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+
+        // 确保页面加载时滚动到顶部
+        window.scrollTo(0, 0);
+    </script>
+</body>
+</html>
