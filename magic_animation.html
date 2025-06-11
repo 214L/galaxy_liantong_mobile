@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=640, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI动效魔力 - 所想皆可画</title>
+    
+<script>
+    const originalLog = console.log;
+    console.log = function (...args) {
+        if (typeof args[0] === 'string' && args[0].includes('* Tone.js')) {
+            return;
+        }
+        originalLog.apply(console, args);
+    };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 640px;
+            height: 1030px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            cursor: pointer;
+            user-select: none;
+            background: linear-gradient(135deg, #00C4CC 0%, #7B68EE 100%);
+            margin: 0 auto;
+            color: #1a1a1a;
+        }
+
+        .container {
+            width: 640px;
+            height: 1030px;
+            position: relative;
+            background: linear-gradient(135deg, #00C4CC 0%, #7B68EE 100%);
+            overflow: hidden;
+        }
+
+        .grid-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 1030px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 12px 12px;
+            pointer-events: none;
+        }
+
+        .intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 1030px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #00C4CC 0%, #7B68EE 100%);
+            z-index: 100;
+        }
+
+        .intro-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 1030px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        .main-title {
+            font-size: 80px;
+            font-weight: 900;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            padding: 20px 40px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .main-title::before,
+        .main-title::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .main-title::before {
+            top: -4px;
+            left: -4px;
+        }
+
+        .main-title::after {
+            bottom: -4px;
+            right: -4px;
+        }
+
+        .magic-subtitle {
+            font-size: 28px;
+            font-weight: 600;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 50px;
+            opacity: 0.9;
+        }
+
+        .start-btn {
+            font-size: 20px;
+            font-weight: 600;
+            color: #7B68EE;
+            background: #fff;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .experience-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 1030px;
+            background: linear-gradient(135deg, #00C4CC 0%, #7B68EE 100%);
+            display: none;
+            z-index: 90;
+            padding: 20px;
+        }
+
+        .editor-header {
+            height: 50px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            margin-bottom: 20px;
+            gap: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .editor-tab {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .editor-tab.active {
+            background: #00C4CC;
+            color: #fff;
+            border-color: #00C4CC;
+        }
+
+        .editor-tools {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .tool-btn {
+            width: 32px;
+            height: 32px;
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .tool-btn.active {
+            background: #FFD93D;
+            border-color: #FFD93D;
+        }
+
+        .design-canvas {
+            width: 100%;
+            height: 380px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .canvas-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .design-element {
+            position: absolute;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .design-element.selected {
+            border-color: #00C4CC;
+        }
+
+        .design-element.selected::before,
+        .design-element.selected::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00C4CC;
+            border: 2px solid #fff;
+            border-radius: 2px;
+        }
+
+        .design-element.selected::before {
+            top: -4px;
+            left: -4px;
+        }
+
+        .design-element.selected::after {
+            bottom: -4px;
+            right: -4px;
+        }
+
+        .element-title {
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .element-shape {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            font-size: 24px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .shape-1 {
+            top: 120px;
+            left: 200px;
+            background: #00C4CC;
+        }
+
+        .shape-2 {
+            top: 120px;
+            left: 280px;
+            background: #FF6B6B;
+        }
+
+        .shape-3 {
+            top: 120px;
+            left: 360px;
+            background: #FFD93D;
+            color: #000;
+        }
+
+        .element-text {
+            top: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+        }
+
+        .animation-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .magic-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #00C4CC, #7B68EE);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .magic-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .animation-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .anim-option {
+            background: #fff;
+            border: 2px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .anim-option:hover {
+            border-color: #00C4CC;
+            background: #f0f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 196, 204, 0.2);
+        }
+
+        .anim-option.selected {
+            border-color: #00C4CC;
+            background: #00C4CC;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 196, 204, 0.3);
+        }
+
+        .anim-icon {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 8px;
+            position: relative;
+        }
+
+        .icon-bounce {
+            width: 16px;
+            height: 16px;
+            background: currentColor;
+            border-radius: 50%;
+            margin: 4px auto;
+            position: relative;
+        }
+
+        .icon-bounce::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            width: 20px;
+            height: 2px;
+            background: currentColor;
+            opacity: 0.3;
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        .icon-slide {
+            width: 20px;
+            height: 12px;
+            background: currentColor;
+            border-radius: 2px;
+            position: relative;
+            margin: 6px auto;
+        }
+
+        .icon-slide::before {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-left: 6px solid currentColor;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            transform: translateY(-50%);
+        }
+
+        .icon-fade {
+            width: 16px;
+            height: 16px;
+            background: currentColor;
+            border-radius: 2px;
+            margin: 4px auto;
+            position: relative;
+            opacity: 0.8;
+        }
+
+        .icon-fade::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px dotted currentColor;
+            border-radius: 4px;
+            opacity: 0.4;
+        }
+
+        .icon-rotate {
+            width: 18px;
+            height: 18px;
+            border: 3px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin: 3px auto;
+            position: relative;
+        }
+
+        .icon-rotate::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 0;
+            height: 0;
+            border-left: 4px solid currentColor;
+            border-top: 2px solid transparent;
+            border-bottom: 2px solid transparent;
+        }
+
+        .icon-wave {
+            width: 20px;
+            height: 12px;
+            margin: 6px auto;
+            position: relative;
+        }
+
+        .icon-wave::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: currentColor;
+            border-radius: 2px;
+            transform: translateY(2px);
+        }
+
+        .icon-wave::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: currentColor;
+            border-radius: 2px;
+            opacity: 0.6;
+            transform: translateY(-2px);
+        }
+
+        .icon-pulse {
+            width: 12px;
+            height: 12px;
+            background: currentColor;
+            border-radius: 50%;
+            margin: 6px auto;
+            position: relative;
+        }
+
+        .icon-pulse::before,
+        .icon-pulse::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .icon-pulse::after {
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            opacity: 0.15;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .apply-button {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            background: #FFD93D;
+            padding: 16px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(255, 217, 61, 0.4);
+        }
+
+        .apply-button:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .apply-button:not(:disabled):hover {
+            background: #FFE55C;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 217, 61, 0.5);
+        }
+
+        .reset-button {
+            width: 60px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            background: #fff;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reset-button:hover {
+            border-color: #00C4CC;
+            color: #00C4CC;
+        }
+
+        .animate-bounce {
+            animation: bounceInEnhanced 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceInEnhanced {
+            0% { 
+                transform: scale(0) rotate(-360deg) translateY(50px); 
+                opacity: 0; 
+                filter: brightness(0.5) blur(3px);
+            }
+            30% { 
+                transform: scale(1.3) rotate(-180deg) translateY(-10px); 
+                opacity: 0.8; 
+                filter: brightness(1.2) blur(1px);
+            }
+            60% { 
+                transform: scale(0.9) rotate(0deg) translateY(5px); 
+                opacity: 1; 
+                filter: brightness(1.1) blur(0px);
+            }
+            80% { 
+                transform: scale(1.1) rotate(0deg) translateY(-2px); 
+                opacity: 1; 
+                filter: brightness(1.05);
+            }
+            100% { 
+                transform: scale(1) rotate(0deg) translateY(0px); 
+                opacity: 1; 
+                filter: brightness(1);
+            }
+        }
+
+        .animate-slide {
+            animation: slideInEnhanced 1s ease-out;
+        }
+
+        @keyframes slideInEnhanced {
+            0% { 
+                transform: translateX(-150px) scale(0.7) skewX(-15deg); 
+                opacity: 0; 
+                filter: blur(2px);
+            }
+            40% { 
+                transform: translateX(20px) scale(1.1) skewX(5deg); 
+                opacity: 0.8; 
+                filter: blur(0px);
+            }
+            70% { 
+                transform: translateX(-10px) scale(1.05) skewX(-2deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translateX(0) scale(1) skewX(0deg); 
+                opacity: 1; 
+            }
+        }
+
+        .animate-fade {
+            animation: fadeScaleEnhanced 1.2s ease-out;
+        }
+
+        @keyframes fadeScaleEnhanced {
+            0% { 
+                transform: scale(0.1) rotate(45deg); 
+                opacity: 0; 
+                filter: brightness(2) blur(4px);
+            }
+            50% { 
+                transform: scale(1.2) rotate(22deg); 
+                opacity: 0.7; 
+                filter: brightness(1.3) blur(1px);
+            }
+            80% { 
+                transform: scale(0.95) rotate(5deg); 
+                opacity: 1; 
+                filter: brightness(1.1) blur(0px);
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1; 
+                filter: brightness(1);
+            }
+        }
+
+        .animate-rotate {
+            animation: rotateZoomEnhanced 1.5s ease-out;
+        }
+
+        @keyframes rotateZoomEnhanced {
+            0% { 
+                transform: rotate(-540deg) scale(0.2); 
+                opacity: 0; 
+                filter: hue-rotate(180deg) saturate(2);
+            }
+            30% { 
+                transform: rotate(-360deg) scale(0.8); 
+                opacity: 0.6; 
+                filter: hue-rotate(90deg) saturate(1.5);
+            }
+            60% { 
+                transform: rotate(-180deg) scale(1.15); 
+                opacity: 0.9; 
+                filter: hue-rotate(45deg) saturate(1.2);
+            }
+            85% { 
+                transform: rotate(-30deg) scale(1.05); 
+                opacity: 1; 
+                filter: hue-rotate(10deg) saturate(1.1);
+            }
+            100% { 
+                transform: rotate(0deg) scale(1); 
+                opacity: 1; 
+                filter: hue-rotate(0deg) saturate(1);
+            }
+        }
+
+        .animate-wave {
+            animation: waveEnhanced 1.8s ease-in-out infinite;
+        }
+
+        @keyframes waveEnhanced {
+            0%, 100% { 
+                transform: translateY(0px) scale(1) rotateZ(0deg); 
+                filter: brightness(1);
+            }
+            25% { 
+                transform: translateY(-15px) scale(1.05) rotateZ(2deg); 
+                filter: brightness(1.1);
+            }
+            50% { 
+                transform: translateY(-25px) scale(1.1) rotateZ(0deg); 
+                filter: brightness(1.2);
+            }
+            75% { 
+                transform: translateY(-15px) scale(1.05) rotateZ(-2deg); 
+                filter: brightness(1.1);
+            }
+        }
+
+        .animate-pulse {
+            animation: pulseEnhanced 2.2s ease-in-out infinite;
+        }
+
+        @keyframes pulseEnhanced {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1; 
+                filter: brightness(1) saturate(1);
+                box-shadow: 0 0 0 0 currentColor;
+            }
+            50% { 
+                transform: scale(1.2) rotate(5deg); 
+                opacity: 0.8; 
+                filter: brightness(1.3) saturate(1.3);
+                box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 1030px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b69 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 80;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-title {
+            font-size: 48px;
+            font-weight: 800;
+            color: #FFD93D;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 20px rgba(255, 217, 61, 0.3);
+        }
+
+        .result-preview {
+            width: 500px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .preview-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .preview-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            animation: titleMegaSpectacular 2s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes titleMegaSpectacular {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg); 
+                color: #1a1a1a;
+                text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            50% { 
+                transform: scale(1.3) rotate(5deg); 
+                color: #FF6B6B;
+                text-shadow: 0 8px 30px rgba(255, 107, 107, 0.8);
+            }
+        }
+
+        .preview-shapes {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .preview-shape {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            color: #fff;
+            transform-origin: center;
+        }
+
+        .preview-shape-1 {
+            background: #00C4CC;
+            animation: shapeMegaSpectacular1 1.5s ease-in-out infinite;
+        }
+
+        @keyframes shapeMegaSpectacular1 {
+            0%, 100% { 
+                transform: translateY(0px) scale(1); 
+                box-shadow: 0 8px 25px rgba(0, 196, 204, 0.4);
+                background: #00C4CC;
+            }
+            50% { 
+                transform: translateY(-40px) scale(1.5); 
+                box-shadow: 0 25px 50px rgba(0, 196, 204, 0.8);
+                background: #00E8F0;
+            }
+        }
+
+        .preview-shape-2 {
+            background: #FF6B6B;
+            animation: shapeMegaSpectacular2 1.8s ease-in-out infinite;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes shapeMegaSpectacular2 {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg); 
+                background: #FF6B6B;
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            }
+            50% { 
+                transform: scale(1.6) rotate(180deg); 
+                background: #FF9999;
+                box-shadow: 0 20px 40px rgba(255, 107, 107, 0.8);
+            }
+        }
+
+        .preview-shape-3 {
+            background: #FFD93D;
+            color: #000;
+            animation: shapeMegaSpectacular3 2.2s ease-in-out infinite;
+            animation-delay: 0.6s;
+        }
+
+        @keyframes shapeMegaSpectacular3 {
+            0%, 100% { 
+                transform: rotate(0deg) scale(1); 
+                background: #FFD93D;
+                box-shadow: 0 8px 25px rgba(255, 217, 61, 0.4);
+            }
+            33% { 
+                transform: rotate(120deg) scale(1.4); 
+                background: #FFE55C;
+                box-shadow: 0 15px 35px rgba(255, 217, 61, 0.6);
+            }
+            66% { 
+                transform: rotate(240deg) scale(1.7); 
+                background: #FFF176;
+                box-shadow: 0 25px 50px rgba(255, 217, 61, 0.9);
+            }
+        }
+
+        .preview-text {
+            font-size: 16px;
+            color: #666;
+            animation: textMegaSpectacular 2.5s ease-in-out infinite;
+            font-weight: 600;
+        }
+
+        @keyframes textMegaSpectacular {
+            0%, 100% { 
+                transform: scale(1); 
+                color: #666;
+                text-shadow: none;
+            }
+            25% { 
+                transform: scale(1.2); 
+                color: #00C4CC;
+                text-shadow: 0 4px 15px rgba(0, 196, 204, 0.6);
+            }
+            50% { 
+                transform: scale(1.4); 
+                color: #FF6B6B;
+                text-shadow: 0 6px 20px rgba(255, 107, 107, 0.8);
+            }
+            75% { 
+                transform: scale(1.2); 
+                color: #FFD93D;
+                text-shadow: 0 4px 15px rgba(255, 217, 61, 0.6);
+            }
+        }
+
+        .result-description {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .cta-final {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            background: #FFD93D;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(255, 217, 61, 0.3);
+        }
+
+        .cta-final:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 217, 61, 0.4);
+        }
+
+        .try-again-btn {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            background: transparent;
+            padding: 16px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .try-again-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .view-button {
+            width: 80px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #7B68EE;
+            background: #fff;
+            padding: 16px;
+            border: 2px solid #7B68EE;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-button:hover {
+            background: #7B68EE;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="grid-background"></div>
+        
+        <!-- 开场界面 -->
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-grid"></div>
+            
+            <h1 class="main-title">所想皆可画</h1>
+            <h2 class="magic-subtitle">AI动效魔力工作室</h2>
+            <button class="start-btn" onclick="startMagicDemo()">
+                体验动效魔法
+            </button>
+        </div>
+        
+        <!-- 体验界面 -->
+        <div class="experience-screen" id="experienceScreen">
+            <!-- 编辑器顶栏 -->
+            <div class="editor-header">
+                <div class="editor-tab active" onclick="playClickSound()">创意海报</div>
+                <div class="editor-tab" onclick="playClickSound()">模板</div>
+                <div class="editor-tab" onclick="playClickSound()">素材</div>
+                
+                <div class="editor-tools">
+                    <div class="tool-btn" onclick="playClickSound()">🎨</div>
+                    <div class="tool-btn" onclick="playClickSound()">📝</div>
+                    <div class="tool-btn active" onclick="playClickSound()">✨</div>
+                    <div class="tool-btn" onclick="playClickSound()">🖼️</div>
+                </div>
+            </div>
+            
+            <!-- 设计画布 -->
+            <div class="design-canvas">
+                <div class="canvas-grid"></div>
+                
+                <div class="design-element element-title">创意海报</div>
+                
+                <div class="design-element element-shape shape-1">A</div>
+                <div class="design-element element-shape shape-2">B</div>
+                <div class="design-element element-shape shape-3">C</div>
+                
+                <div class="design-element element-text">青春无限 · 梦想起航</div>
+            </div>
+            
+            <!-- 动效控制面板 -->
+            <div class="animation-panel">
+                <div class="panel-title">
+                    <div class="magic-icon"></div>
+                    AI动效选择
+                </div>
+                <div class="animation-options">
+                    <div class="anim-option" data-animation="bounce">
+                        <div class="anim-icon icon-bounce"></div>
+                        弹跳进入
+                    </div>
+                    <div class="anim-option" data-animation="slide">
+                        <div class="anim-icon icon-slide"></div>
+                        滑动登场
+                    </div>
+                    <div class="anim-option" data-animation="fade">
+                        <div class="anim-icon icon-fade"></div>
+                        渐现缩放
+                    </div>
+                    <div class="anim-option" data-animation="rotate">
+                        <div class="anim-icon icon-rotate"></div>
+                        旋转缩放
+                    </div>
+                    <div class="anim-option" data-animation="wave">
+                        <div class="anim-icon icon-wave"></div>
+                        波浪律动
+                    </div>
+                    <div class="anim-option" data-animation="pulse">
+                        <div class="anim-icon icon-pulse"></div>
+                        脉冲呼吸
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 控制按钮 -->
+            <div class="control-buttons">
+                <button class="apply-button" id="applyButton" onclick="applyAnimation()" disabled>
+                    请先选择动效类型
+                </button>
+                <button class="reset-button" onclick="resetAnimation()">
+                    重置
+                </button>
+                <button class="view-button" onclick="viewResult()">
+                    查看完整效果
+                </button>
+            </div>
+        </div>
+        
+        <!-- 结果界面 -->
+        <div class="result-screen" id="resultScreen">
+            <div class="success-title">魔法成功！</div>
+            
+            <div class="result-preview">
+                <div class="preview-grid"></div>
+                <div class="preview-content">
+                    <div class="preview-title">创意海报</div>
+                    <div class="preview-shapes">
+                        <div class="preview-shape preview-shape-1">A</div>
+                        <div class="preview-shape preview-shape-2">B</div>
+                        <div class="preview-shape preview-shape-3">C</div>
+                    </div>
+                    <div class="preview-text">青春无限 · 梦想起航</div>
+                </div>
+            </div>
+            
+            <div class="result-description">
+                静态设计瞬间变成动态大片！<br>
+                这就是AI动效魔力工作室的强大威力
+            </div>
+            
+            <div class="result-buttons">
+                <button class="cta-final" onclick="openCanva()">
+                    立即体验完整版
+                </button>
+                <button class="try-again-btn" onclick="tryAgain()">
+                    再试其他动效
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAnimation = '';
+        let audioInitialized = false;
+        
+        async function initAudio() {
+            if (!audioInitialized) {
+                await Tone.start();
+                audioInitialized = true;
+            }
+        }
+        
+        function playClickSound() {
+            if (!audioInitialized) return;
+            
+            const synth = new Tone.Synth({
+                oscillator: { type: "square" },
+                envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 },
+                volume: -20
+            }).toDestination();
+            
+            synth.triggerAttackRelease("C6", "32n");
+            
+            setTimeout(() => {
+                synth.dispose();
+            }, 100);
+        }
+        
+        function playSelectSound() {
+            if (!audioInitialized) return;
+            
+            const synth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 },
+                volume: -18
+            }).toDestination();
+            
+            synth.triggerAttackRelease("A5", "16n");
+            
+            setTimeout(() => {
+                synth.dispose();
+            }, 200);
+        }
+        
+        function playMagicSound() {
+            if (!audioInitialized) return;
+            
+            const synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.05, decay: 0.2, sustain: 0.1, release: 0.3 },
+                volume: -15
+            }).toDestination();
+            
+            const reverb = new Tone.Reverb(1).toDestination();
+            reverb.wet.value = 0.3;
+            synth.connect(reverb);
+            
+            const magicNotes = ["E5", "G5", "B5", "E6", "G6"];
+            
+            magicNotes.forEach((note, index) => {
+                setTimeout(() => {
+                    synth.triggerAttackRelease(note, "16n");
+                }, index * 120);
+            });
+            
+            setTimeout(() => {
+                synth.dispose();
+                reverb.dispose();
+            }, 1500);
+        }
+        
+        function playSuccessSound() {
+            if (!audioInitialized) return;
+            
+            const synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.05, decay: 0.15, sustain: 0.2, release: 0.4 },
+                volume: -16
+            }).toDestination();
+            
+            const successNotes = ["C5", "E5", "G5", "C6"];
+            
+            successNotes.forEach((note, index) => {
+                setTimeout(() => {
+                    synth.triggerAttackRelease(note, "8n");
+                }, index * 80);
+            });
+            
+            setTimeout(() => {
+                synth.dispose();
+            }, 1000);
+        }
+        
+        function playApplySound() {
+            if (!audioInitialized) return;
+            
+            const synth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 },
+                volume: -17
+            }).toDestination();
+            
+            synth.triggerAttackRelease("G4", "8n");
+            
+            setTimeout(() => {
+                synth.triggerAttackRelease("C5", "8n");
+            }, 150);
+            
+            setTimeout(() => {
+                synth.triggerAttackRelease("E5", "4n");
+            }, 300);
+            
+            setTimeout(() => {
+                synth.dispose();
+            }, 800);
+        }
+        
+        function playCompleteEffectSound() {
+            if (!audioInitialized) return;
+            
+            const synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 0.6 },
+                volume: -14
+            }).toDestination();
+            
+            const delay = new Tone.PingPongDelay("8n", 0.3).toDestination();
+            const reverb = new Tone.Reverb(1.5).toDestination();
+            reverb.wet.value = 0.4;
+            
+            synth.connect(delay);
+            synth.connect(reverb);
+            
+            const spectacularNotes = [
+                { note: "C5", time: 0 },
+                { note: "E5", time: 100 },
+                { note: "G5", time: 200 },
+                { note: "C6", time: 300 },
+                { note: "E6", time: 400 },
+                { note: "G6", time: 500 },
+                { note: "C7", time: 600 }
+            ];
+            
+            spectacularNotes.forEach(({ note, time }) => {
+                setTimeout(() => {
+                    synth.triggerAttackRelease(note, "8n");
+                }, time);
+            });
+            
+            setTimeout(() => {
+                synth.dispose();
+                delay.dispose();
+                reverb.dispose();
+            }, 2000);
+        }
+        
+        async function startMagicDemo() {
+            await initAudio();
+            playMagicSound();
+            
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('experienceScreen').style.display = 'block';
+            
+            initializeAnimationOptions();
+            
+            setTimeout(() => {
+                const elements = document.querySelectorAll('.design-element');
+                elements.forEach((el, index) => {
+                    setTimeout(() => {
+                        el.classList.add('selected');
+                        playSelectSound();
+                    }, index * 200);
+                });
+            }, 500);
+        }
+        
+        function initializeAnimationOptions() {
+            const options = document.querySelectorAll('.anim-option');
+            
+            options.forEach(option => {
+                option.addEventListener('click', async () => {
+                    await initAudio();
+                    playSelectSound();
+                    
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedAnimation = option.dataset.animation;
+                    
+                    updateApplyButton();
+                });
+            });
+        }
+        
+        function updateApplyButton() {
+            const button = document.getElementById('applyButton');
+            
+            if (selectedAnimation) {
+                button.disabled = false;
+                button.textContent = `🪄 应用"${getAnimationName(selectedAnimation)}"动效`;
+            }
+        }
+        
+        function getAnimationName(animation) {
+            const names = {
+                bounce: '弹跳进入',
+                slide: '滑动登场',
+                fade: '渐现缩放',
+                rotate: '旋转缩放',
+                wave: '波浪律动',
+                pulse: '脉冲呼吸'
+            };
+            return names[animation];
+        }
+        
+        async function applyAnimation() {
+            if (!selectedAnimation) return;
+            
+            await initAudio();
+            playApplySound();
+            
+            const button = document.getElementById('applyButton');
+            button.disabled = true;
+            button.textContent = '🪄 AI正在施加魔法...';
+            
+            setTimeout(() => {
+                applyAnimationToElements();
+                
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.textContent = `🪄 应用"${getAnimationName(selectedAnimation)}"动效`;
+                }, 2000);
+                
+            }, 1000);
+        }
+        
+        function applyAnimationToElements() {
+            const elements = document.querySelectorAll('.design-element');
+            const animClass = `animate-${selectedAnimation}`;
+            
+            elements.forEach(el => {
+                const classes = ['animate-bounce', 'animate-slide', 'animate-fade', 'animate-rotate', 'animate-wave', 'animate-pulse'];
+                classes.forEach(cls => el.classList.remove(cls));
+            });
+            
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add(animClass);
+                    playSelectSound();
+                }, index * 150);
+            });
+        }
+        
+        async function resetAnimation() {
+            await initAudio();
+            playClickSound();
+            
+            const elements = document.querySelectorAll('.design-element');
+            const classes = ['animate-bounce', 'animate-slide', 'animate-fade', 'animate-rotate', 'animate-wave', 'animate-pulse'];
+            
+            elements.forEach(el => {
+                classes.forEach(cls => el.classList.remove(cls));
+            });
+        }
+        
+        async function viewResult() {
+            if (!selectedAnimation) {
+                await initAudio();
+                playClickSound();
+                alert('请先应用一个动效！');
+                return;
+            }
+            
+            await initAudio();
+            playCompleteEffectSound();
+            
+            document.getElementById('experienceScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'flex';
+        }
+        
+        async function tryAgain() {
+            await initAudio();
+            playClickSound();
+            
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('experienceScreen').style.display = 'block';
+            
+            document.querySelectorAll('.anim-option').forEach(opt => opt.classList.remove('selected'));
+            selectedAnimation = '';
+            
+            const button = document.getElementById('applyButton');
+            button.disabled = true;
+            button.textContent = '请先选择动效类型';
+        }
+        
+        async function openCanva() {
+            await initAudio();
+            playSuccessSound();
+            window.open('https://www.canva.cn/magic', '_blank');
+        }
+    </script>
+</body>
+</html>
